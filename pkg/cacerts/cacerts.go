@@ -12,6 +12,7 @@ import (
 	"time"
 )
 
+// CaCerts is a struct for holding all of the certificates in a certificate pool
 type CaCerts struct {
 	certMap map[string]*x509.Certificate
 }
@@ -22,17 +23,17 @@ func New() *CaCerts {
 	}
 }
 
-func (p *CaCerts) print(header string) {
+func (c *CaCerts) print(header string) {
 	fmt.Println(header)
 
 	skeys := make([]string, 0)
-	for k, _ := range p.certMap {
+	for k := range c.certMap {
 		skeys = append(skeys, k)
 	}
 	sort.Strings(skeys)
 
 	for _, k := range skeys {
-		v := p.certMap[k]
+		v := c.certMap[k]
 		fmt.Println("   ", v.NotAfter, v.Subject.Organization,
 			v.Subject.OrganizationalUnit, v.Subject.Country,
 			v.Subject.CommonName)
@@ -44,7 +45,7 @@ func Compare(pone *CaCerts, ptwo *CaCerts) {
 	inboth := make([]string, 0)
 
 	// remove pool two certificates
-	for k, _ := range pone.certMap {
+	for k := range pone.certMap {
 		if _, ok := ptwo.certMap[k]; ok {
 			inboth = append(inboth, k)
 		}
@@ -56,9 +57,9 @@ func Compare(pone *CaCerts, ptwo *CaCerts) {
 		delete(pone.certMap, ib)
 		delete(ptwo.certMap, ib)
 	}
+
 	pone.print("*** Certificates only in pool one")
 	ptwo.print("*** Certificates only in pool two")
-
 }
 
 func (c *CaCerts) AddCert(cert *x509.Certificate) {
